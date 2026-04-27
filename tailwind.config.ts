@@ -9,9 +9,12 @@ const config: Config = {
   content: [
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    "./src/lib/**/*.{js,ts,jsx,tsx,mdx}", // lib 폴더도 추가해서 안전하게 갑니다
   ],
   theme: {
-    extend: {},
+    extend: {
+      // 나중에 전직 시스템용 커스텀 색상을 넣을 공간입니다
+    },
   },
   plugins: [],
 }
