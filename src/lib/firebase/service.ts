@@ -1,15 +1,14 @@
 /** * 작성일: 2026-04-27
  * 작성자: 시스템 (Project Sua)
- * 클래스 설명: Firestore 데이터 읽기/쓰기 서비스 로직 (Stats & Logs)
+ * 클래스 설명: Firestore 데이터 안정화 및 목표 설정 로직 (Set/Merge 도입)
  */
 
 import { db } from './config';
-import { doc, getDoc, setDoc, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { UserStats, StudyLog } from '@/types/schema';
 
-const USER_ID = "sua_user"; // 1인 플랫폼이므로 고정 ID 사용
+const USER_ID = "sua_user";
 
-// 1. 수아의 현재 스탯 가져오기
 export const getUserStats = async (): Promise<UserStats | null> => {
   const docRef = doc(db, "users", USER_ID);
   const docSnap = await getDoc(docRef);
@@ -17,32 +16,24 @@ export const getUserStats = async (): Promise<UserStats | null> => {
   return null;
 };
 
-// 2. 학습 결과 저장 및 스탯 업데이트
 export const saveMissionResult = async (log: StudyLog) => {
-  const userRef = doc(db, "users", USER_ID);
   const logRef = doc(db, "study_logs", `${USER_ID}_${Date.now()}`);
-
-  // 학습 로그 저장
   await setDoc(logRef, {
     ...log,
     userId: USER_ID,
     solvedAt: serverTimestamp()
   });
-
-  // 유저 스탯 업데이트 (경험치 및 누적 시간)
-  // 실제 로직에서는 과목별 점수를 계산하여 업데이트합니다.
-  await updateDoc(userRef, {
-    totalStudyTimeMs: arrayUnion(log.timeSpentMs), // 단순 예시, 실제론 합산 로직 필요
-    "stats.math": arrayUnion(5), // 성공 시 스탯 상승 로직 등 추가 예정
-  });
 };
 
-/** * 3. 수아의 전직(계열) 경로 업데이트 
+/**
+ * 수아의 미래 꿈(목표) 업데이트
+ * 문서가 없으면 생성하고, 있으면 기존 데이터와 병합(Merge)합니다.
  */
 export const updateCareerPath = async (path: string) => {
   const userRef = doc(db, "users", USER_ID);
-  await updateDoc(userRef, {
+  await setDoc(userRef, {
     careerPath: path,
-    level: arrayUnion(1) // 전직 시 레벨업 혹은 기록용 (로직은 추후 고도화)
-  });
+    level: 15,
+    stats: { math: 10, language: 10, english: 10 } // 초기 기본값
+  }, { merge: true });
 };
