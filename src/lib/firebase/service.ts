@@ -36,3 +36,13 @@ export const saveMissionResult = async (log: StudyLog) => {
     "stats.math": arrayUnion(5), // 성공 시 스탯 상승 로직 등 추가 예정
   });
 };
+
+/** * 3. 수아의 전직(계열) 경로 업데이트 
+ */
+export const updateCareerPath = async (path: string) => {
+  const userRef = doc(db, "users", USER_ID);
+  await updateDoc(userRef, {
+    careerPath: path,
+    level: arrayUnion(1) // 전직 시 레벨업 혹은 기록용 (로직은 추후 고도화)
+  });
+};

@@ -1,6 +1,6 @@
 /** * 작성일: 2026-04-27
  * 작성자: 시스템 (Project Sua)
- * 클래스 설명: Firebase 실시간 데이터 바인딩이 적용된 Bento Grid 기반 대시보드
+ * 클래스 설명: Firebase 실시간 데이터 바인딩 및 전직 시스템 연결이 적용된 대시보드
  */
 
 'use client';
@@ -46,7 +46,13 @@ export default function Dashboard() {
             <h1 className="text-2xl font-black text-gray-900">
               Lv. {loading ? '--' : currentLevel} 수아
             </h1>
-            <p className="text-sm text-gray-500 font-medium mt-1">목표: {career}</p>
+            
+            {/* [Step 11 반영] 목표 클릭 시 전직 선택 페이지(/career)로 이동 */}
+            <Link href="/career" className="inline-block group">
+              <p className="text-sm text-blue-600 font-bold mt-1 group-hover:underline flex items-center">
+                목표: {career} <span className="ml-1 text-xs text-blue-400 group-hover:rotate-90 transition-transform">⚙️</span>
+              </p>
+            </Link>
           </div>
           <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-xl">
             🎓
