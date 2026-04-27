@@ -6,8 +6,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+
 import { Question } from '@/types/mission';
 import 'katex/dist/katex.min.css';
+// @ts-ignore: Vercel 엄격한 빌드 환경에서 KaTeX 모듈의 타입 누락 방지
 import renderMathInElement from 'katex/dist/contrib/auto-render';
 
 interface Props {
