@@ -1,8 +1,11 @@
 /**
  * 작성일: 2026-04-28
  * 작성자: 시스템 (Project Sua)
- * 클래스 설명: Firebase Auth 기반 계정 상태 관리, 연속 출석(Streak) 자동 계산 및 학습 진행도 통합 스토어
- * 업데이트 내용: 계정 전환 시 로컬 데이터 교차 오염을 방지하기 위한 resetAllData 강제 파기 로직 추가
+ * 클래스 설명: Firebase Auth 기반 계정 상태 관리, 연속 출석(Streak) 자동 계산 및 꿈(Career) 데이터가 통합된 전역 스토어
+ * 업데이트 내용: 
+ * 1. careerPath 상태 필드 추가 및 setCareerPath 액션 구현
+ * 2. syncFromFirebase 내 Firestore 데이터(careerPath) 동기화 로직 추가
+ * 3. resetAllData 호출 시 꿈 데이터도 함께 파기되도록 수정
  */
 
 import { create } from 'zustand';
@@ -19,6 +22,9 @@ interface ProgressState {
   user: UserProfile | null;
   streak: number;
   lastLoginDate: string | null;
+  
+  // ✅ 신규: 수아의 꿈(목표) 데이터 상태
+  careerPath: string | null;
 
   progress: Record<string, number>;
   wrongAnswers: Record<string, string[]>;
@@ -28,6 +34,9 @@ interface ProgressState {
   setUser: (user: UserProfile | null) => void;
   syncFromFirebase: (uid: string) => Promise<void>;
   checkAndCalculateStreak: (uid: string) => Promise<void>;
+  
+  // ✅ 신규: 꿈 설정 액션 (UI 실시간 업데이트용)
+  setCareerPath: (path: string) => void;
 
   updateProgress: (unitId: string, currentSolvedIndex: number) => Promise<void>;
   saveUserSelection: (unitId: string, questionIdx: number, selection: any) => void;
@@ -37,7 +46,6 @@ interface ProgressState {
   removeSimilarProblemRequest: (unitId: string, problemId: string) => void;
   clearUnitData: (unitId: string) => void;
   
-  // ✅ 신규: 모든 로컬 데이터 강제 초기화 (로그아웃 및 신규 계정용)
   resetAllData: () => void;
 }
 
@@ -47,12 +55,16 @@ export const useProgressStore = create<ProgressState>()(
       user: null,
       streak: 0,
       lastLoginDate: null,
+      careerPath: null, // 초기값 설정
       progress: {},
       wrongAnswers: {},
       userSelections: {},
       similarProblemRequests: {},
 
       setUser: (user) => set({ user }),
+
+      // ✅ 신규: 로컬 상태의 꿈 데이터를 즉시 변경
+      setCareerPath: (path) => set({ careerPath: path }),
 
       syncFromFirebase: async (uid) => {
         try {
@@ -62,10 +74,12 @@ export const useProgressStore = create<ProgressState>()(
               progress: remoteData.unitProgress || {},
               wrongAnswers: remoteData.wrongAnswers || {},
               streak: remoteData.streak || 0,
-              lastLoginDate: remoteData.lastLoginDate || null
+              lastLoginDate: remoteData.lastLoginDate || null,
+              // ✅ 서버 Firestore에 저장된 꿈 데이터 동기화
+              careerPath: remoteData.careerPath || null
             });
           } else {
-            // ✅ 서버에 데이터가 없는 신규 계정 접속 시, 기기에 남은 타인의 로컬 데이터를 파기
+            // 서버에 데이터가 없는 신규 계정 접속 시, 기기에 남은 타인의 로컬 데이터를 파기
             get().resetAllData();
           }
           await get().checkAndCalculateStreak(uid);
@@ -175,7 +189,7 @@ export const useProgressStore = create<ProgressState>()(
         });
       },
 
-      // ✅ 신규: 로그아웃 및 계정 전환 시 호출될 전체 데이터 파기 함수
+      // 모든 로컬 데이터 강제 초기화 (로그아웃 및 신규 계정용)
       resetAllData: () => {
         set({
           progress: {},
@@ -183,7 +197,8 @@ export const useProgressStore = create<ProgressState>()(
           userSelections: {},
           similarProblemRequests: {},
           streak: 0,
-          lastLoginDate: null
+          lastLoginDate: null,
+          careerPath: null // ✅ 꿈 데이터도 함께 초기화
         });
       }
     }),

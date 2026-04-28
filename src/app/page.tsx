@@ -1,7 +1,10 @@
 /**
  * 작성일: 2026-04-28
  * 작성자: 시스템 (Project Sua)
- * 클래스 설명: 학습 묶음(Bundle) 순서 기반 퀘스트 배정 및 로그아웃 기능, 긴 닉네임 UI 깨짐 방지가 적용된 대시보드
+ * 클래스 설명: 꿈(Career) 설정 진입로 및 실시간 데이터 연동이 완료된 최종 대시보드
+ * 업데이트 내용: 
+ * 1. useProgressStore에서 careerPath 추출 및 UI 연동
+ * 2. 목표 문구 클릭 시 /career 페이지로 이동하는 Link 및 설정 아이콘(⚙️) 추가
  */
 
 'use client';
@@ -38,7 +41,8 @@ const QUEST_SEQUENCE = {
 };
 
 export default function Dashboard() {
-  const { progress, user, streak } = useProgressStore();
+  // ✅ 스토어에서 careerPath(꿈 데이터)를 추가로 가져옵니다.
+  const { progress, user, streak, careerPath } = useProgressStore();
 
   const { mathPct, engPct, korPct } = useMemo(() => {
     let m = 0, e = 0, k = 0;
@@ -80,6 +84,9 @@ export default function Dashboard() {
   };
 
   const displayName = user?.displayName || '수아';
+  
+  // ✅ 설정된 꿈이 없으면 기본 문구를 보여줍니다.
+  const displayGoal = careerPath || "인서울 상위 15% 진입";
 
   return (
     <div className="p-5 pb-24 space-y-6 text-gray-900">
@@ -95,9 +102,14 @@ export default function Dashboard() {
                 로그아웃
               </button>
             </div>
-            <p className="text-sm text-blue-600 font-bold mt-1 truncate">
-              목표: 인서울 상위 15% 진입
-            </p>
+            
+            {/* ✅ 수정된 부분: 클릭 시 꿈 설정 페이지(/career)로 이동합니다. */}
+            <Link href="/career" className="inline-block group mt-1 max-w-full">
+              <p className="text-sm text-blue-600 font-bold group-hover:underline flex items-center truncate">
+                목표: {displayGoal}
+                <span className="ml-1 text-[10px] text-blue-300 group-hover:rotate-90 transition-transform">⚙️</span>
+              </p>
+            </Link>
           </div>
           <div className="shrink-0 flex flex-col items-center bg-orange-50 px-3 py-2 rounded-xl border border-orange-100">
             <span className="text-xl">🔥</span>
