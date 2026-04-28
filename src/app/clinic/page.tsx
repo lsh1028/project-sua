@@ -8,18 +8,18 @@
 
 import React from 'react';
 import { useProgressStore } from '@/store/useProgressStore';
-import { math_m1_1_problems } from '@/data/problems/math/m1-1';
-import { Problem } from '@/types/problem';
+import { math_m1_1_questions } from '@/data/questions/math/m1-1';
+import { Question } from '@/types/question';
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
 
 export default function ClinicPage() {
-  // ✅ removeSimilarProblemRequest 가져오기
-  const { similarProblemRequests, removeSimilarProblemRequest } = useProgressStore();
+  // ✅ removeSimilarQuestionRequest 가져오기
+  const { similarQuestionRequests, removeSimilarQuestionRequest } = useProgressStore();
 
-  const allRequestedIds = Object.values(similarProblemRequests).flat();
-  const allProblems: Problem[] = [...math_m1_1_problems]; 
-  const requestedProblems = allProblems.filter(p => allRequestedIds.includes(p.id));
+  const allRequestedIds = Object.values(similarQuestionRequests).flat();
+  const allQuestions: Question[] = [...math_m1_1_questions]; 
+  const requestedQuestions = allQuestions.filter(p => allRequestedIds.includes(p.id));
 
   return (
     <div className="p-5 pb-24 space-y-6 text-gray-900">
@@ -30,7 +30,7 @@ export default function ClinicPage() {
         </p>
       </header>
 
-      {requestedProblems.length === 0 ? (
+      {requestedQuestions.length === 0 ? (
         <div className="py-20 flex flex-col items-center justify-center text-center space-y-4">
           <div className="text-5xl opacity-20">💬</div>
           <p className="text-gray-400 text-sm font-bold">현재 등록된 유사 문제 요청이 없다.<br/>리뷰 모드에서 취약 유형을 분석하고 요청을 등록해라.</p>
@@ -38,22 +38,22 @@ export default function ClinicPage() {
       ) : (
         <div className="space-y-4">
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">요청 리스트 ({requestedProblems.length})</span>
+            <span className="text-xs font-black text-gray-400 uppercase tracking-widest">요청 리스트 ({requestedQuestions.length})</span>
           </div>
 
-          {requestedProblems.map((problem) => (
-            <div key={problem.id} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+          {requestedQuestions.map((question) => (
+            <div key={question.id} className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
               <div className="p-5 space-y-4">
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
                     <span className="text-[10px] font-black px-2 py-0.5 bg-orange-100 text-orange-600 rounded-full">
                       유사 문제 요청됨
                     </span>
-                    <p className="text-[10px] text-gray-400 font-bold">{problem.unitId} | ID: {problem.id}</p>
+                    <p className="text-[10px] text-gray-400 font-bold">{question.unitId} | ID: {question.id}</p>
                   </div>
                   {/* ✅ 클릭 시 삭제 이벤트 연결 */}
                   <button 
-                    onClick={() => removeSimilarProblemRequest(problem.unitId, problem.id)}
+                    onClick={() => removeSimilarQuestionRequest(question.unitId, question.id)}
                     className="text-[10px] font-black text-gray-300 hover:text-red-500 transition-colors"
                   >
                     삭제
@@ -62,7 +62,7 @@ export default function ClinicPage() {
 
                 <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                   <p className="text-sm font-bold text-gray-800 leading-relaxed break-keep">
-                    <Latex>{problem.question}</Latex>
+                    <Latex>{question.question}</Latex>
                   </p>
                 </div>
 

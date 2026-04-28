@@ -9,8 +9,8 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { math_m1_1_problems } from '@/data/problems/math/m1-1';
-import { Problem } from '@/types/problem';
+import { math_m1_1_questions } from '@/data/questions/math/m1-1';
+import { Question } from '@/types/question';
 import { useProgressStore } from '@/store/useProgressStore';
 
 import 'katex/dist/katex.min.css';
@@ -26,7 +26,7 @@ function MissionContent() {
   const { 
     progress, updateProgress, recordWrongAnswers, resolveWrongAnswer, 
     wrongAnswers, saveUserSelection, userSelections: storeUserSelections,
-    requestSimilarProblem 
+    requestSimilarQuestion 
   } = useProgressStore();
 
   const [isInit, setIsInit] = useState(false); 
@@ -37,9 +37,9 @@ function MissionContent() {
   const [activeRationaleIdx, setActiveRationaleIdx] = useState<number | null>(null);
   const [elapsedSec, setElapsedSec] = useState(0);
 
-  const problems = unitId === 'm1-1' ? math_m1_1_problems : [];
-  const totalQuestions = problems.length;
-  const currentQ: Problem = problems[currentIdx];
+  const questions = unitId === 'm1-1' ? math_m1_1_questions : [];
+  const totalQuestions = questions.length;
+  const currentQ: Question = questions[currentIdx];
 
   // 1. 세션 복원 및 스마트 재진입
   useEffect(() => {
@@ -95,7 +95,7 @@ function MissionContent() {
     return `${m}:${s}`;
   };
 
-  if (!unitId || problems.length === 0) {
+  if (!unitId || questions.length === 0) {
     return (
       <div className="p-5 h-screen flex flex-col items-center justify-center text-center space-y-4">
         <div className="text-5xl">🚧</div>
@@ -142,7 +142,7 @@ function MissionContent() {
     commitCurrentSelection();
 
     const wrongIds: string[] = [];
-    problems.forEach((p, idx) => {
+    questions.forEach((p, idx) => {
       const userVal = String(userSelections[idx] || '').trim();
       const answerVal = String(p.answer).trim();
       if (userVal !== answerVal) {
@@ -186,7 +186,7 @@ function MissionContent() {
           <div className="space-y-3 mb-8">
             <p className="text-sm font-bold text-gray-500 uppercase tracking-widest">분석 결과</p>
             <div className="flex flex-wrap justify-center gap-2">
-              {problems.map((p, idx) => {
+              {questions.map((p, idx) => {
                 const isCorrect = String(userSelections[idx] || '').trim() === String(p.answer).trim();
                 return (
                   <button 
@@ -224,7 +224,7 @@ function MissionContent() {
         </button>
         {isReview ? (
           <button 
-            onClick={() => { requestSimilarProblem(unitId, currentQ.id); alert("상담소에 유사 문제 풀이를 요청했습니다."); }}
+            onClick={() => { requestSimilarQuestion(unitId, currentQ.id); alert("상담소에 유사 문제 풀이를 요청했습니다."); }}
             className="flex items-center space-x-1 text-xs font-bold text-orange-500 bg-orange-50 px-3 py-1.5 rounded-full hover:bg-orange-100"
           >
             <span>🙋‍♂️ 유사 문제 요청</span>

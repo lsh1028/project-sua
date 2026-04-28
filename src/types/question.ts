@@ -14,7 +14,7 @@ export interface AnswerOption {
   rationale: string;    // 해당 보기가 오답이거나 정답인 구체적 이유
 }
 
-export interface Problem {
+export interface Question {
   id: string;             // 문제 고유 번호 (예: m1-1-001)
   unitId: string;         // 소속 단원 ID (예: m1-1)
   type: QuestionType;     // 문제 유형
@@ -31,13 +31,20 @@ export interface Problem {
   explanation: string;    // 전체 총평 해설
 }
 
+/** * ✅ 학습 결과 로그 데이터 구조 (Store의 호출 규격에 맞게 수정)
+ */
 export interface StudyLog {
-  userId: string;
-  missionId: string;
-  unitName: string;
-  bundleName: string;     
-  solvedAt: any;
-  timeSpentMs: number;
-  score: number;
-  wrongQuestionIds: string[]; 
+  unitId: string;           // 진행 중인 단원 ID
+  solvedCount: number;      // 푼 문제 수
+  solvedAt: any;            // 학습 일시
+  wrongQuestionIds: string[]; // 틀린 문제 ID 리스트
+  userId?: string;          // 유저 ID (Service에서 병합됨)
+}
+
+export interface UserStats {
+  unitProgress: Record<string, number>; // 각 단원별 진행도 (문제 번호)
+  wrongAnswers: Record<string, string[]>; // 단원별 오답 ID 리스트
+  streak: number;                       // 연속 학습 일수
+  lastLoginDate: string | null;         // 마지막 로그인 날짜
+  careerPath: string | null;            // 설정된 꿈/목표
 }

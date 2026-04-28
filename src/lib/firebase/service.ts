@@ -11,7 +11,7 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { UserStats, StudyLog } from '@/types/schema'; // 기존 타입 임포트 유지
+import { UserStats, StudyLog } from '@/types/question'; // 기존 타입 임포트 유지
 
 // Firebase 설정 (환경변수 권장, 여기서는 하드코딩 유지)
 const firebaseConfig = {

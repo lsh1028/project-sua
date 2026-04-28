@@ -29,7 +29,7 @@ interface ProgressState {
   progress: Record<string, number>;
   wrongAnswers: Record<string, string[]>;
   userSelections: Record<string, Record<number, any>>;
-  similarProblemRequests: Record<string, string[]>;
+  similarQuestionRequests: Record<string, string[]>;
 
   setUser: (user: UserProfile | null) => void;
   syncFromFirebase: (uid: string) => Promise<void>;
@@ -41,9 +41,9 @@ interface ProgressState {
   updateProgress: (unitId: string, currentSolvedIndex: number) => Promise<void>;
   saveUserSelection: (unitId: string, questionIdx: number, selection: any) => void;
   recordWrongAnswers: (unitId: string, wrongIds: string[]) => Promise<void>;
-  resolveWrongAnswer: (unitId: string, problemId: string) => Promise<void>;
-  requestSimilarProblem: (unitId: string, problemId: string) => void;
-  removeSimilarProblemRequest: (unitId: string, problemId: string) => void;
+  resolveWrongAnswer: (unitId: string, questionId: string) => Promise<void>;
+  requestSimilarQuestion: (unitId: string, questionId: string) => void;
+  removeSimilarQuestionRequest: (unitId: string, questionId: string) => void;
   clearUnitData: (unitId: string) => void;
   
   resetAllData: () => void;
@@ -59,7 +59,7 @@ export const useProgressStore = create<ProgressState>()(
       progress: {},
       wrongAnswers: {},
       userSelections: {},
-      similarProblemRequests: {},
+      similarQuestionRequests: {},
 
       setUser: (user) => set({ user }),
 
@@ -145,29 +145,29 @@ export const useProgressStore = create<ProgressState>()(
         if (user) await saveUserData(user.uid, { unitProgress: progress, wrongAnswers });
       },
 
-      resolveWrongAnswer: async (unitId, problemId) => {
-        const updatedWrongs = (get().wrongAnswers[unitId] || []).filter(id => id !== problemId);
+      resolveWrongAnswer: async (unitId, questionId) => {
+        const updatedWrongs = (get().wrongAnswers[unitId] || []).filter(id => id !== questionId);
         set((state) => ({ wrongAnswers: { ...state.wrongAnswers, [unitId]: updatedWrongs } }));
         const { user, progress, wrongAnswers } = get();
         if (user) await saveUserData(user.uid, { unitProgress: progress, wrongAnswers });
       },
 
-      requestSimilarProblem: (unitId, problemId) => {
+      requestSimilarQuestion: (unitId, questionId) => {
         set((state) => ({
-          similarProblemRequests: {
-            ...state.similarProblemRequests,
-            [unitId]: Array.from(new Set([...(state.similarProblemRequests[unitId] || []), problemId]))
+          similarQuestionRequests: {
+            ...state.similarQuestionRequests,
+            [unitId]: Array.from(new Set([...(state.similarQuestionRequests[unitId] || []), questionId]))
           }
         }));
       },
 
-      removeSimilarProblemRequest: (unitId, problemId) => {
+      removeSimilarQuestionRequest: (unitId, questionId) => {
         set((state) => {
-          const currentRequests = state.similarProblemRequests[unitId] || [];
+          const currentRequests = state.similarQuestionRequests[unitId] || [];
           return {
-            similarProblemRequests: {
-              ...state.similarProblemRequests,
-              [unitId]: currentRequests.filter(id => id !== problemId)
+            similarQuestionRequests: {
+              ...state.similarQuestionRequests,
+              [unitId]: currentRequests.filter(id => id !== questionId)
             }
           };
         });
@@ -178,14 +178,14 @@ export const useProgressStore = create<ProgressState>()(
           const newProgress = { ...state.progress };
           const newWrongs = { ...state.wrongAnswers };
           const newSelections = { ...state.userSelections };
-          const newRequests = { ...state.similarProblemRequests };
+          const newRequests = { ...state.similarQuestionRequests };
           
           delete newProgress[unitId];
           delete newWrongs[unitId];
           delete newSelections[unitId];
           delete newRequests[unitId];
 
-          return { progress: newProgress, wrongAnswers: newWrongs, userSelections: newSelections, similarProblemRequests: newRequests };
+          return { progress: newProgress, wrongAnswers: newWrongs, userSelections: newSelections, similarQuestionRequests: newRequests };
         });
       },
 
@@ -195,7 +195,7 @@ export const useProgressStore = create<ProgressState>()(
           progress: {},
           wrongAnswers: {},
           userSelections: {},
-          similarProblemRequests: {},
+          similarQuestionRequests: {},
           streak: 0,
           lastLoginDate: null,
           careerPath: null // ✅ 꿈 데이터도 함께 초기화

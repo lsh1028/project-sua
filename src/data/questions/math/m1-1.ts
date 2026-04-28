@@ -5,9 +5,9 @@
  * 변경 내역: 오답 복구 모드(Review)를 위한 보기별 개별 해설(rationale) 구조 적용 및 정답 인덱스 동기화
  */
 
-import { Problem } from '@/types/problem';
+import { Question } from '@/types/question';
 
-export const math_m1_1_problems: Problem[] = [
+export const math_m1_1_questions: Question[] = [
   {
     id: "m1-1-001", 
     unitId: "m1-1", 
