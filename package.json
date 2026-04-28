@@ -13,7 +13,10 @@
     "katex": "^0.16.45",
     "next": "14.2.3",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "react-latex-next": "^3.0.0",
+    "recharts": "^3.8.1",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "@types/katex": "^0.16.8",
