@@ -1,8 +1,8 @@
 /**
- * 작성일: 2026-04-28
+ * 작성일: 2026-04-30
  * 작성자: 시스템 (Project Sua)
  * 클래스 설명: 앱 전체 접근 권한(Passcode + Firebase Auth)을 제어하는 보안 래퍼 컴포넌트
- * 업데이트 내용: 로그아웃 상태 감지 시 로컬 스토리지 데이터(resetAllData) 즉시 파기 로직 추가
+ * 업데이트 내용: 브라우저 탭 세션 단위의 보안 유지를 위해 localStorage를 sessionStorage로 전환
  */
 
 'use client';
@@ -17,10 +17,11 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const [passcode, setPasscode] = useState('');
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   
-  const { user, setUser, syncFromFirebase, resetAllData } = useProgressStore();
+  const { user, setUser, syncFromFirebase, resetAllData, isPasswordEnabled } = useProgressStore();
 
   useEffect(() => {
-    const unlocked = localStorage.getItem('sua_unlocked') === 'true';
+    // 보안 인증 수단을 sessionStorage로 변경하여 탭 종료 시 자동 초기화되도록 구성
+    const unlocked = sessionStorage.getItem('sua_unlocked') === 'true';
     setIsUnlocked(unlocked);
 
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -33,8 +34,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         await syncFromFirebase(currentUser.uid);
       } else {
         setUser(null);
-        // ✅ 로그아웃 시점에 기기에 저장된 이전 사용자의 모든 로컬 데이터 파기
         resetAllData();
+        sessionStorage.removeItem('sua_unlocked');
+        setIsUnlocked(false);
       }
       setIsAuthLoading(false);
     });
@@ -45,7 +47,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const handlePasscode = (e: React.FormEvent) => {
     e.preventDefault();
     if (passcode === '0804') {
-      localStorage.setItem('sua_unlocked', 'true');
+      sessionStorage.setItem('sua_unlocked', 'true');
       setIsUnlocked(true);
     } else {
       alert('접근 권한이 없습니다. (비밀번호 오류)');
@@ -70,7 +72,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!isUnlocked) {
+  if (isPasswordEnabled && !isUnlocked) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-gray-900 px-5 text-center">
         <div className="text-6xl mb-6">🔒</div>

@@ -6,6 +6,7 @@
  * 1. careerPath 상태 필드 추가 및 setCareerPath 액션 구현
  * 2. syncFromFirebase 내 Firestore 데이터(careerPath) 동기화 로직 추가
  * 3. resetAllData 호출 시 꿈 데이터도 함께 파기되도록 수정
+ * 4. 입장 암호(isPasswordEnabled) 상태 및 토글 액션 추가
  */
 
 import { create } from 'zustand';
@@ -26,6 +27,9 @@ interface ProgressState {
   // ✅ 신규: 수아의 꿈(목표) 데이터 상태
   careerPath: string | null;
 
+  // ✅ 신규: 입장 암호(0804) 활성화 여부
+  isPasswordEnabled: boolean;
+
   progress: Record<string, number>;
   wrongAnswers: Record<string, string[]>;
   userSelections: Record<string, Record<number, any>>;
@@ -37,6 +41,9 @@ interface ProgressState {
   
   // ✅ 신규: 꿈 설정 액션 (UI 실시간 업데이트용)
   setCareerPath: (path: string) => void;
+
+  // ✅ 신규: 입장 암호 설정 액션
+  setPasswordEnabled: (enabled: boolean) => void;
 
   updateProgress: (unitId: string, currentSolvedIndex: number) => Promise<void>;
   saveUserSelection: (unitId: string, questionIdx: number, selection: any) => void;
@@ -56,6 +63,7 @@ export const useProgressStore = create<ProgressState>()(
       streak: 0,
       lastLoginDate: null,
       careerPath: null, // 초기값 설정
+      isPasswordEnabled: true, // ✅ 신규: 초기 상태는 암호 사용으로 설정
       progress: {},
       wrongAnswers: {},
       userSelections: {},
@@ -65,6 +73,9 @@ export const useProgressStore = create<ProgressState>()(
 
       // ✅ 신규: 로컬 상태의 꿈 데이터를 즉시 변경
       setCareerPath: (path) => set({ careerPath: path }),
+
+      // ✅ 신규: 입장 암호 사용 여부 변경 액션
+      setPasswordEnabled: (enabled) => set({ isPasswordEnabled: enabled }),
 
       syncFromFirebase: async (uid) => {
         try {
@@ -198,7 +209,8 @@ export const useProgressStore = create<ProgressState>()(
           similarQuestionRequests: {},
           streak: 0,
           lastLoginDate: null,
-          careerPath: null // ✅ 꿈 데이터도 함께 초기화
+          careerPath: null, // ✅ 꿈 데이터도 함께 초기화
+          isPasswordEnabled: true // ✅ 계정 리셋 시 암호 상태도 기본값으로 복구
         });
       }
     }),

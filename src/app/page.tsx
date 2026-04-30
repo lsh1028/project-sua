@@ -1,10 +1,11 @@
 /**
  * 작성일: 2026-04-28
  * 작성자: 시스템 (Project Sua)
- * 클래스 설명: 꿈(Career) 설정 진입로 및 실시간 데이터 연동이 완료된 최종 대시보드
+ * 클래스 설명: 꿈 설정 및 입장 암호 토글 기능이 포함된 통합 대시보드
  * 업데이트 내용: 
- * 1. useProgressStore에서 careerPath 추출 및 UI 연동
- * 2. 목표 문구 클릭 시 /career 페이지로 이동하는 Link 및 설정 아이콘(⚙️) 추가
+ * 1. 로그아웃 옆 '입장 암호(0804) 사용' 토글 UI 추가
+ * 2. useProgressStore의 isPasswordEnabled 상태 연동
+ * 3. [수정] 상단 프로필 영역 겹침 현상 해결을 위해 스위치 그룹을 독립된 열로 분리
  */
 
 'use client';
@@ -41,8 +42,7 @@ const QUEST_SEQUENCE = {
 };
 
 export default function Dashboard() {
-  // ✅ 스토어에서 careerPath(꿈 데이터)를 추가로 가져옵니다.
-  const { progress, user, streak, careerPath } = useProgressStore();
+  const { progress, user, streak, careerPath, isPasswordEnabled, setPasswordEnabled } = useProgressStore();
 
   const { mathPct, engPct, korPct } = useMemo(() => {
     let m = 0, e = 0, k = 0;
@@ -84,8 +84,6 @@ export default function Dashboard() {
   };
 
   const displayName = user?.displayName || '수아';
-  
-  // ✅ 설정된 꿈이 없으면 기본 문구를 보여줍니다.
   const displayGoal = careerPath || "인서울 상위 15% 진입";
 
   return (
@@ -94,16 +92,9 @@ export default function Dashboard() {
       <section className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
         <div className="flex justify-between items-start mb-4">
           <div className="flex-1 min-w-0 pr-3">
-            <div className="flex items-center space-x-2">
-              <h1 className="text-xl font-black text-gray-900 truncate">
-                {displayName}
-              </h1>
-              <button onClick={handleLogout} className="shrink-0 text-[10px] font-bold text-gray-400 hover:text-red-500 bg-gray-100 px-2 py-1 rounded-md transition-colors">
-                로그아웃
-              </button>
-            </div>
-            
-            {/* ✅ 수정된 부분: 클릭 시 꿈 설정 페이지(/career)로 이동합니다. */}
+            <h1 className="text-xl font-black text-gray-900 truncate mb-1">
+              {displayName}
+            </h1>
             <Link href="/career" className="inline-block group mt-1 max-w-full">
               <p className="text-sm text-blue-600 font-bold group-hover:underline flex items-center truncate">
                 목표: {displayGoal}
@@ -114,6 +105,29 @@ export default function Dashboard() {
           <div className="shrink-0 flex flex-col items-center bg-orange-50 px-3 py-2 rounded-xl border border-orange-100">
             <span className="text-xl">🔥</span>
             <span className="text-[10px] font-black text-orange-600 mt-1">{streak}일 연속!</span>
+          </div>
+        </div>
+
+        {/* ✅ 깨짐 방지: 좁은 영역에 있던 스위치 그룹을 독립된 영역으로 분리 */}
+        <div className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-xl border border-gray-100 mb-5">
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input 
+              type="checkbox" 
+              className="sr-only peer" 
+              checked={isPasswordEnabled}
+              onChange={(e) => setPasswordEnabled(e.target.checked)}
+            />
+            <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-[1.1rem] peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
+            <span className="ml-2 text-[11px] font-bold text-gray-500 whitespace-nowrap">입장 암호 사용</span>
+          </label>
+          <div className="flex items-center">
+            <div className="w-[1px] h-3 bg-gray-200 mr-3"></div>
+            <button 
+              onClick={handleLogout} 
+              className="text-[11px] font-bold text-gray-400 hover:text-red-500 transition-colors whitespace-nowrap"
+            >
+              로그아웃
+            </button>
           </div>
         </div>
         
