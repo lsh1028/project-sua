@@ -9,7 +9,7 @@
 
 import { Question } from '@/types/question';
 
-export const kor_k2_2_questions: Question[] = [
+export const kor_k2_1_questions: Question[] = [
   {
     id: "k2-1-001",
     unitId: "k2-1",
