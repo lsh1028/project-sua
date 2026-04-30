@@ -1,8 +1,8 @@
 /**
- * 작성일: 2026-04-28
+ * 작성일: 2026-04-30
  * 작성자: 시스템 (Project Sua)
  * 클래스 설명: 3개 정렬 모드 통합 및 실시간 진행도(오답 수 포함)가 반영된 마스터 라이브러리
- * 업데이트 내용: 정렬 탭 순서 변경 (학습 묶음 -> 학년별 -> 시험 기준) 및 기본 뷰 설정
+ * 업데이트 내용: 정렬 탭 순서 변경 및 영어 과목 학습 묶음(Bundle) 정렬 순서 논리적 오류 수정 (관계사 D -> 구문 확장 E)
  */
 
 'use client';
@@ -69,31 +69,34 @@ export default function LibraryPage() {
       { id: 'm3-7', title: '통계 (산포도)', status: 'locked', grade: '중3', solved: 0, total: 15, note: '중학 마지막 단원', period: '2학기 기말 대비', bundle: 'D. 기하와 통계' },
     ],
     ENG: [
-      { id: 'e-1', title: '문장의 성분과 5형식', status: 'active', grade: '중1', solved: 0, total: 35, note: '독해의 뼈대 잡기', period: '1학기 기말 선행', bundle: 'A. 문장 구조' },
-      { id: 'e-2', title: '시제 (현재/과거/진행)', status: 'active', grade: '중1', solved: 0, total: 25, note: '동사 변화의 기초', period: '1학기 기말 선행', bundle: 'B. 시제와 조동사' },
-      { id: 'e-3', title: '조동사', status: 'active', grade: '중1', solved: 0, total: 20, note: '의미를 풍부하게', period: '상시 (고입 준비)', bundle: 'B. 시제와 조동사' },
-      { id: 'e-4', title: 'to부정사', status: 'active', grade: '중2', solved: 0, total: 35, note: '가장 빈출되는 문법', period: '1학기 기말 선행', bundle: 'C. 준동사 핵심' },
-      { id: 'e-5', title: '동명사', status: 'active', grade: '중2', solved: 0, total: 25, note: '서술형 필수 체크', period: '상시 (고입 준비)', bundle: 'C. 준동사 핵심' },
-      { id: 'e-6', title: '현재완료 시제', status: 'active', grade: '중2', solved: 0, total: 30, note: '고등 내신 시제 완성', period: '상시 (고입 준비)', bundle: 'B. 시제와 조동사' },
-      { id: 'e-7', title: '수동태', status: 'active', grade: '중2', solved: 0, total: 25, note: '정확한 주어/목적어 파악', period: '상시 (고입 준비)', bundle: 'D. 구문 확장' },
-      { id: 'e-8', title: '형용사/부사/비교', status: 'skipped', grade: '중2', solved: 0, total: 0, note: '우선순위 낮음', period: '제외', bundle: 'Z. 제외 항목' },
-      { id: 'e-9', title: '관계대명사 기초', status: 'active', grade: '중2', solved: 0, total: 40, note: '문장이 길어지는 원리', period: '1학기 기말 선행', bundle: 'E. 관계사 완성' },
-      { id: 'e-10', title: '분사 (현재/과거분사)', status: 'active', grade: '중3', solved: 0, total: 35, note: '1학기 서술형 킬러', isCurrentScope: true, period: '1학기 기말 대비', bundle: 'C. 준동사 핵심' },
-      { id: 'e-11', title: '관계사 심화 (What/부사)', status: 'active', grade: '중3', solved: 0, total: 45, note: '수능 독해의 마스터 키', isCurrentScope: true, period: '1학기 기말 대비', bundle: 'E. 관계사 완성' },
-      { id: 'e-12', title: '접속사와 일치', status: 'active', grade: '중3', solved: 0, total: 25, note: '2학기 주요 문법', isCurrentScope: true, period: '2학기 중간 대비', bundle: 'D. 구문 확장' },
-      { id: 'e-13', title: '가정법/특수구문', status: 'locked', grade: '중3', solved: 0, total: 20, note: '선행 목표', period: '2학기 기말 대비', bundle: 'D. 구문 확장' },
+      // ✅ 실제 데이터베이스 매핑에 맞춰 영어 단원 ID 교체 완료
+      { id: 'e1-1', title: '문장의 성분과 5형식', status: 'active', grade: '중1', solved: 0, total: 35, note: '독해의 뼈대 잡기', period: '1학기 기말 선행', bundle: 'A. 문장 구조' },
+      { id: 'e1-2', title: '시제 (현재/과거/진행)', status: 'active', grade: '중1', solved: 0, total: 25, note: '동사 변화의 기초', period: '1학기 기말 선행', bundle: 'B. 시제와 조동사' },
+      { id: 'e1-3', title: '조동사', status: 'active', grade: '중1', solved: 0, total: 20, note: '의미를 풍부하게', period: '상시 (고입 준비)', bundle: 'B. 시제와 조동사' },
+      { id: 'e2-1', title: 'to부정사', status: 'active', grade: '중2', solved: 0, total: 35, note: '가장 빈출되는 문법', period: '1학기 기말 선행', bundle: 'C. 준동사 핵심' },
+      { id: 'e2-2', title: '동명사', status: 'active', grade: '중2', solved: 0, total: 25, note: '서술형 필수 체크', period: '상시 (고입 준비)', bundle: 'C. 준동사 핵심' },
+      { id: 'e2-3', title: '현재완료 시제', status: 'active', grade: '중2', solved: 0, total: 30, note: '고등 내신 시제 완성', period: '상시 (고입 준비)', bundle: 'B. 시제와 조동사' },
+      // ✅ 구문 확장(D -> E) / 관계사 완성(E -> D) 논리적 순서로 스왑
+      { id: 'e2-4', title: '수동태', status: 'active', grade: '중2', solved: 0, total: 25, note: '정확한 주어/목적어 파악', period: '상시 (고입 준비)', bundle: 'E. 구문 확장' },
+      { id: 'e2-5', title: '형용사/부사/비교', status: 'skipped', grade: '중2', solved: 0, total: 0, note: '우선순위 낮음', period: '제외', bundle: 'Z. 제외 항목' },
+      { id: 'e2-6', title: '관계대명사 기초', status: 'active', grade: '중2', solved: 0, total: 40, note: '문장이 길어지는 원리', period: '1학기 기말 선행', bundle: 'D. 관계사 완성' },
+      { id: 'e3-1', title: '분사 (현재/과거분사)', status: 'active', grade: '중3', solved: 0, total: 35, note: '1학기 서술형 킬러', isCurrentScope: true, period: '1학기 기말 대비', bundle: 'C. 준동사 핵심' },
+      { id: 'e3-2', title: '관계사 심화 (What/부사)', status: 'active', grade: '중3', solved: 0, total: 45, note: '수능 독해의 마스터 키', isCurrentScope: true, period: '1학기 기말 대비', bundle: 'D. 관계사 완성' },
+      { id: 'e3-3', title: '접속사와 일치', status: 'active', grade: '중3', solved: 0, total: 25, note: '2학기 주요 문법', isCurrentScope: true, period: '2학기 중간 대비', bundle: 'E. 구문 확장' },
+      { id: 'e3-4', title: '가정법/특수구문', status: 'locked', grade: '중3', solved: 0, total: 20, note: '선행 목표', period: '2학기 기말 대비', bundle: 'E. 구문 확장' },
     ],
     KOR: [
-      { id: 'k-1', title: '단어의 갈래 (품사)', status: 'active', grade: '중1', solved: 0, total: 20, note: '문법 기초 다지기', period: '1학기 기말 선행', bundle: 'A. 기초 문법' },
-      { id: 'k-2', title: '언어의 본질과 어휘', status: 'active', grade: '중1', solved: 0, total: 30, note: '문해력 기본기', period: '1학기 기말 선행', bundle: 'B. 문해력과 독해' },
-      { id: 'k-3', title: '문학 (시/소설) 감상 기초', status: 'skipped', grade: '중1', solved: 0, total: 0, note: '상시 학습 가능 영역', period: '제외', bundle: 'Z. 제외 항목' },
-      { id: 'k-4', title: '문장의 짜임과 성분', status: 'active', grade: '중2', solved: 0, total: 30, note: '고1 국어 내신 직결', period: '1학기 기말 선행', bundle: 'A. 기초 문법' },
-      { id: 'k-5', title: '설명문과 논설문 읽기', status: 'active', grade: '중2', solved: 0, total: 45, note: '모든 공부의 기초 독해력', period: '상시 (고입 준비)', bundle: 'B. 문해력과 독해' },
-      { id: 'k-6', title: '한글 창제 원리와 가치', status: 'locked', grade: '중2', solved: 0, total: 15, note: '고등 중세문법 대비', period: '상시 (고입 준비)', bundle: 'A. 기초 문법' },
-      { id: 'k-7', title: '음운의 체계와 변동', status: 'active', grade: '중3', solved: 0, total: 30, note: '1학기 필수 문법!', isCurrentScope: true, period: '1학기 기말 대비', bundle: 'A. 기초 문법' },
-      { id: 'k-8', title: '비문학 구조 독해 심화', status: 'active', grade: '중3', solved: 0, total: 50, note: '수능 공통 영역 선점', isCurrentScope: true, period: '2학기 중간 대비', bundle: 'B. 문해력과 독해' },
-      { id: 'k-9', title: '고전 시가/수필 맛보기', status: 'locked', grade: '중3', solved: 0, total: 20, note: '예비 과정', period: '상시 (고입 준비)', bundle: 'B. 문해력과 독해' },
-      { id: 'k-10', title: '매체와 언어 예절', status: 'skipped', grade: '중3', solved: 0, total: 0, note: '변별력 낮음', period: '제외', bundle: 'Z. 제외 항목' },
+      // ✅ 실제 데이터베이스 매핑에 맞춰 국어 단원 ID 교체 완료
+      { id: 'k1-1', title: '단어의 갈래 (품사)', status: 'active', grade: '중1', solved: 0, total: 20, note: '문법 기초 다지기', period: '1학기 기말 선행', bundle: 'A. 기초 문법' },
+      { id: 'k1-2', title: '언어의 본질과 어휘', status: 'active', grade: '중1', solved: 0, total: 30, note: '문해력 기본기', period: '1학기 기말 선행', bundle: 'B. 문해력과 독해' },
+      { id: 'k1-3', title: '문학 (시/소설) 감상 기초', status: 'skipped', grade: '중1', solved: 0, total: 0, note: '상시 학습 가능 영역', period: '제외', bundle: 'Z. 제외 항목' },
+      { id: 'k2-1', title: '문장의 짜임과 성분', status: 'active', grade: '중2', solved: 0, total: 30, note: '고1 국어 내신 직결', period: '1학기 기말 선행', bundle: 'A. 기초 문법' },
+      { id: 'k2-2', title: '설명문과 논설문 읽기', status: 'active', grade: '중2', solved: 0, total: 45, note: '모든 공부의 기초 독해력', period: '상시 (고입 준비)', bundle: 'B. 문해력과 독해' },
+      { id: 'k2-3', title: '한글 창제 원리와 가치', status: 'locked', grade: '중2', solved: 0, total: 15, note: '고등 중세문법 대비', period: '상시 (고입 준비)', bundle: 'A. 기초 문법' },
+      { id: 'k3-1', title: '음운의 체계와 변동', status: 'active', grade: '중3', solved: 0, total: 30, note: '1학기 필수 문법!', isCurrentScope: true, period: '1학기 기말 대비', bundle: 'A. 기초 문법' },
+      { id: 'k3-2', title: '비문학 구조 독해 심화', status: 'active', grade: '중3', solved: 0, total: 50, note: '수능 공통 영역 선점', isCurrentScope: true, period: '2학기 중간 대비', bundle: 'B. 문해력과 독해' },
+      { id: 'k3-3', title: '고전 시가/수필 맛보기', status: 'locked', grade: '중3', solved: 0, total: 20, note: '예비 과정', period: '상시 (고입 준비)', bundle: 'B. 문해력과 독해' },
+      { id: 'k3-4', title: '매체와 언어 예절', status: 'skipped', grade: '중3', solved: 0, total: 0, note: '변별력 낮음', period: '제외', bundle: 'Z. 제외 항목' },
     ],
   };
 
@@ -152,7 +155,6 @@ export default function LibraryPage() {
       </div>
 
       <div className="flex space-x-2">
-        {/* ✅ 버튼 렌더링 순서를 묶음 -> 학년별 -> 시험 기준으로 재배치 */}
         {([
           { mode: 'BUNDLE', label: '학습 묶음' },
           { mode: 'GRADE', label: '학년별' },

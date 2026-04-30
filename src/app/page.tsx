@@ -1,11 +1,12 @@
 /**
- * 작성일: 2026-04-28
+ * 작성일: 2026-04-30
  * 작성자: 시스템 (Project Sua)
  * 클래스 설명: 꿈 설정 및 입장 암호 토글 기능이 포함된 통합 대시보드
  * 업데이트 내용: 
  * 1. 로그아웃 옆 '입장 암호(0804) 사용' 토글 UI 추가
  * 2. useProgressStore의 isPasswordEnabled 상태 연동
  * 3. [수정] 상단 프로필 영역 겹침 현상 해결을 위해 스위치 그룹을 독립된 열로 분리
+ * 4. [수정] 영어 과목(ENG)의 QUEST_SEQUENCE를 논리적 학습 흐름에 맞게 재배열 (관계사 -> 분사 -> 구문 확장)
  */
 
 'use client';
@@ -26,18 +27,24 @@ const QUEST_SEQUENCE = {
     { id: 'm1-3', title: '문자와 식', bundle: 'B. 방정식의 흐름', total: 30 },
   ],
   ENG: [
-    { id: 'e-1', title: '문장의 성분과 5형식', bundle: 'A. 문장 구조', total: 35 },
-    { id: 'e-2', title: '시제 (현재/과거/진행)', bundle: 'B. 시제와 조동사', total: 25 },
-    { id: 'e-3', title: '조동사', bundle: 'B. 시제와 조동사', total: 20 },
-    { id: 'e-6', title: '현재완료 시제', bundle: 'B. 시제와 조동사', total: 30 },
-    { id: 'e-4', title: 'to부정사', bundle: 'C. 준동사 핵심', total: 35 },
+    { id: 'e1-1', title: '문장의 성분과 5형식', bundle: 'A. 문장 구조', total: 35 },
+    { id: 'e1-2', title: '시제 (현재/과거/진행)', bundle: 'B. 시제와 조동사', total: 25 },
+    { id: 'e1-3', title: '조동사', bundle: 'B. 시제와 조동사', total: 20 },
+    { id: 'e2-3', title: '현재완료 시제', bundle: 'B. 시제와 조동사', total: 30 },
+    { id: 'e2-1', title: 'to부정사', bundle: 'C. 준동사 핵심', total: 35 },
+    { id: 'e2-2', title: '동명사', bundle: 'C. 준동사 핵심', total: 25 }, // 준동사 흐름 보강
+    { id: 'e3-1', title: '분사 (현재/과거분사)', bundle: 'C. 준동사 핵심', total: 35 }, // 1학기 기말 대비
+    { id: 'e2-6', title: '관계대명사 기초', bundle: 'D. 관계사 완성', total: 40 }, // 1학기 기말 선행
+    { id: 'e3-2', title: '관계사 심화 (What/부사)', bundle: 'D. 관계사 완성', total: 45 }, // 1학기 기말 대비
+    { id: 'e2-4', title: '수동태', bundle: 'E. 구문 확장', total: 25 }, // 2학기 진도 대비
+    { id: 'e3-3', title: '접속사와 일치', bundle: 'E. 구문 확장', total: 25 }, // 2학기 진도 대비
   ],
   KOR: [
-    { id: 'k-1', title: '단어의 갈래 (품사)', bundle: 'A. 기초 문법', total: 20 },
-    { id: 'k-4', title: '문장의 짜임과 성분', bundle: 'A. 기초 문법', total: 30 },
-    { id: 'k-6', title: '한글 창제 원리와 가치', bundle: 'A. 기초 문법', total: 15 },
-    { id: 'k-7', title: '음운의 체계와 변동', bundle: 'A. 기초 문법', total: 30 },
-    { id: 'k-2', title: '언어의 본질과 어휘', bundle: 'B. 문해력과 독해', total: 30 },
+    { id: 'k1-1', title: '단어의 갈래 (품사)', bundle: 'A. 기초 문법', total: 20 },
+    { id: 'k2-1', title: '문장의 짜임과 성분', bundle: 'A. 기초 문법', total: 30 },
+    { id: 'k3-1', title: '한글 창제 원리와 가치', bundle: 'A. 기초 문법', total: 15 },
+    { id: 'k3-2', title: '음운의 체계와 변동', bundle: 'A. 기초 문법', total: 30 },
+    { id: 'k1-2', title: '언어의 본질과 어휘', bundle: 'B. 문해력과 독해', total: 30 },
   ]
 };
 

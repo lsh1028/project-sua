@@ -1,24 +1,69 @@
 /**
- * 작성일: 2026-04-28
+ * 작성일: 2026-04-30
  * 작성자: 시스템 (Project Sua)
- * 클래스 설명: 유사 문제 요청 리스트 관리 (삭제 기능 연동) 및 시스템 가이드
+ * 클래스 설명: 유사 문제 요청 리스트 관리 (삭제 기능 연동) 및 전체 단원 문항 연동
  */
 
 'use client';
 
 import React from 'react';
 import { useProgressStore } from '@/store/useProgressStore';
-import { math_m1_1_questions } from '@/data/questions/math/m1-1';
 import { Question } from '@/types/question';
 import 'katex/dist/katex.min.css';
 import Latex from 'react-latex-next';
+import { renderFormattedText } from '@/utils/textFormatter';
+
+// ✅ 새롭게 생성한 모든 단원의 데이터를 불러옵니다.
+// [수학]
+import { math_m1_1_questions } from '@/data/questions/math/m1-1';
+import { math_m1_2_questions } from '@/data/questions/math/m1-2';
+import { math_m2_1_questions } from '@/data/questions/math/m2-1';
+import { math_m2_2_questions } from '@/data/questions/math/m2-2';
+import { math_m3_1_questions } from '@/data/questions/math/m3-1'; 
+import { math_m3_2_questions } from '@/data/questions/math/m3-2'; 
+
+// [영어]
+import { eng_e1_1_questions } from '@/data/questions/eng/e1-1';
+import { eng_e1_2_questions } from '@/data/questions/eng/e1-2';
+import { eng_e1_3_questions } from '@/data/questions/eng/e1-3';
+import { eng_e2_1_questions } from '@/data/questions/eng/e2-1';
+import { eng_e2_2_questions } from '@/data/questions/eng/e2-2';
+import { eng_e2_3_questions } from '@/data/questions/eng/e2-3';
+import { eng_e3_1_questions } from '@/data/questions/eng/e3-1';
+
+// [국어]
+import { kor_k1_1_questions } from '@/data/questions/kor/k1-1';
+import { kor_k2_1_questions } from '@/data/questions/kor/k2-1';
+import { kor_k3_1_questions } from '@/data/questions/kor/k3-1';
 
 export default function ClinicPage() {
-  // ✅ removeSimilarQuestionRequest 가져오기
   const { similarQuestionRequests, removeSimilarQuestionRequest } = useProgressStore();
 
   const allRequestedIds = Object.values(similarQuestionRequests).flat();
-  const allQuestions: Question[] = [...math_m1_1_questions]; 
+  
+  // ✅ 모든 과목, 모든 문항 데이터를 하나의 배열로 통합합니다.
+  const allQuestions: Question[] = [
+    // 수학
+    ...math_m1_1_questions,
+    ...math_m1_2_questions,
+    ...math_m2_1_questions,
+    ...math_m2_2_questions,
+    ...math_m3_1_questions,
+    ...math_m3_2_questions,
+    // 영어
+    ...eng_e1_1_questions,
+    ...eng_e1_2_questions,
+    ...eng_e1_3_questions,
+    ...eng_e2_1_questions,
+    ...eng_e2_2_questions,
+    ...eng_e2_3_questions,
+    ...eng_e3_1_questions,
+    // 국어
+    ...kor_k1_1_questions,
+    ...kor_k2_1_questions,
+    ...kor_k3_1_questions
+  ]; 
+  
   const requestedQuestions = allQuestions.filter(p => allRequestedIds.includes(p.id));
 
   return (
@@ -62,7 +107,7 @@ export default function ClinicPage() {
 
                 <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
                   <p className="text-sm font-bold text-gray-800 leading-relaxed break-keep">
-                    <Latex>{question.question}</Latex>
+                    {renderFormattedText(question.question)}
                   </p>
                 </div>
 

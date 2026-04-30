@@ -1,7 +1,8 @@
 /**
- * 작성일: 2026-04-28
+ * 작성일: 2026-04-30
  * 작성자: 시스템 (Project Sua)
  * 클래스 설명: 미해결 오답 문항을 학습 묶음(Bundle) 순서로 그룹화하여 제공하는 취약점 노트
+ * 업데이트 내용: 영어 과목 학습 묶음(Bundle) 정렬 순서 논리적 오류 수정 (관계사 D -> 구문 확장 E) 통합 반영
  */
 
 'use client';
@@ -48,26 +49,27 @@ export default function ReviewPage() {
       { id: 'm3-4', title: '이차함수와 그래프', status: 'active', grade: '중3', total: 80, note: '기말고사 최종 보스', period: '1학기 기말 대비', bundle: 'C. 함수의 완성' },
     ],
     ENG: [
-      { id: 'e-1', title: '문장의 성분과 5형식', status: 'active', grade: '중1', total: 35, note: '독해의 뼈대 잡기', period: '1학기 기말 선행', bundle: 'A. 문장 구조' },
-      { id: 'e-2', title: '시제 (현재/과거/진행)', status: 'active', grade: '중1', total: 25, note: '동사 변화의 기초', period: '1학기 기말 선행', bundle: 'B. 시제와 조동사' },
-      { id: 'e-3', title: '조동사', status: 'active', grade: '중1', total: 20, note: '의미를 풍부하게', period: '상시 (고입 준비)', bundle: 'B. 시제와 조동사' },
-      { id: 'e-4', title: 'to부정사', status: 'active', grade: '중2', total: 35, note: '가장 빈출되는 문법', period: '1학기 기말 선행', bundle: 'C. 준동사 핵심' },
-      { id: 'e-5', title: '동명사', status: 'active', grade: '중2', total: 25, note: '서술형 필수 체크', period: '상시 (고입 준비)', bundle: 'C. 준동사 핵심' },
-      { id: 'e-6', title: '현재완료 시제', status: 'active', grade: '중2', total: 30, note: '고등 내신 시제 완성', period: '상시 (고입 준비)', bundle: 'B. 시제와 조동사' },
-      { id: 'e-7', title: '수동태', status: 'active', grade: '중2', total: 25, note: '정확한 주어/목적어 파악', period: '상시 (고입 준비)', bundle: 'D. 구문 확장' },
-      { id: 'e-9', title: '관계대명사 기초', status: 'active', grade: '중2', total: 40, note: '문장이 길어지는 원리', period: '1학기 기말 선행', bundle: 'E. 관계사 완성' },
-      { id: 'e-10', title: '분사 (현재/과거분사)', status: 'active', grade: '중3', total: 35, note: '1학기 서술형 킬러', period: '1학기 기말 대비', bundle: 'C. 준동사 핵심' },
-      { id: 'e-11', title: '관계사 심화 (What/부사)', status: 'active', grade: '중3', total: 45, note: '수능 독해의 마스터 키', period: '1학기 기말 대비', bundle: 'E. 관계사 완성' },
-      { id: 'e-12', title: '접속사와 일치', status: 'active', grade: '중3', total: 25, note: '2학기 주요 문법', period: '2학기 중간 대비', bundle: 'D. 구문 확장' },
+      { id: 'e1-1', title: '문장의 성분과 5형식', status: 'active', grade: '중1', total: 35, note: '독해의 뼈대 잡기', period: '1학기 기말 선행', bundle: 'A. 문장 구조' },
+      { id: 'e1-2', title: '시제 (현재/과거/진행)', status: 'active', grade: '중1', total: 25, note: '동사 변화의 기초', period: '1학기 기말 선행', bundle: 'B. 시제와 조동사' },
+      { id: 'e1-3', title: '조동사', status: 'active', grade: '중1', total: 20, note: '의미를 풍부하게', period: '상시 (고입 준비)', bundle: 'B. 시제와 조동사' },
+      { id: 'e2-1', title: 'to부정사', status: 'active', grade: '중2', total: 35, note: '가장 빈출되는 문법', period: '1학기 기말 선행', bundle: 'C. 준동사 핵심' },
+      { id: 'e2-2', title: '동명사', status: 'active', grade: '중2', total: 25, note: '서술형 필수 체크', period: '상시 (고입 준비)', bundle: 'C. 준동사 핵심' },
+      { id: 'e2-3', title: '현재완료 시제', status: 'active', grade: '중2', total: 30, note: '고등 내신 시제 완성', period: '상시 (고입 준비)', bundle: 'B. 시제와 조동사' },
+      // ✅ 구문 확장(D -> E) / 관계사 완성(E -> D) 논리적 순서로 스왑
+      { id: 'e2-4', title: '수동태', status: 'active', grade: '중2', total: 25, note: '정확한 주어/목적어 파악', period: '상시 (고입 준비)', bundle: 'E. 구문 확장' },
+      { id: 'e2-6', title: '관계대명사 기초', status: 'active', grade: '중2', total: 40, note: '문장이 길어지는 원리', period: '1학기 기말 선행', bundle: 'D. 관계사 완성' },
+      { id: 'e3-1', title: '분사 (현재/과거분사)', status: 'active', grade: '중3', total: 35, note: '1학기 서술형 킬러', period: '1학기 기말 대비', bundle: 'C. 준동사 핵심' },
+      { id: 'e3-2', title: '관계사 심화 (What/부사)', status: 'active', grade: '중3', total: 45, note: '수능 독해의 마스터 키', period: '1학기 기말 대비', bundle: 'D. 관계사 완성' },
+      { id: 'e3-3', title: '접속사와 일치', status: 'active', grade: '중3', total: 25, note: '2학기 주요 문법', period: '2학기 중간 대비', bundle: 'E. 구문 확장' },
     ],
     KOR: [
-      { id: 'k-1', title: '단어의 갈래 (품사)', status: 'active', grade: '중1', total: 20, note: '문법 기초 다지기', period: '1학기 기말 선행', bundle: 'A. 기초 문법' },
-      { id: 'k-2', title: '언어의 본질과 어휘', status: 'active', grade: '중1', total: 30, note: '문해력 기본기', period: '1학기 기말 선행', bundle: 'B. 문해력과 독해' },
-      { id: 'k-4', title: '문장의 짜임과 성분', status: 'active', grade: '중2', total: 30, note: '고1 국어 내신 직결', period: '1학기 기말 선행', bundle: 'A. 기초 문법' },
-      { id: 'k-5', title: '설명문과 논설문 읽기', status: 'active', grade: '중2', total: 45, note: '모든 공부의 기초 독해력', period: '상시 (고입 준비)', bundle: 'B. 문해력과 독해' },
-      { id: 'k-6', title: '한글 창제 원리와 가치', status: 'locked', grade: '중2', total: 15, note: '고등 중세문법 대비', period: '상시 (고입 준비)', bundle: 'A. 기초 문법' },
-      { id: 'k-7', title: '음운의 체계와 변동', status: 'active', grade: '중3', total: 30, note: '1학기 필수 문법!', period: '1학기 기말 대비', bundle: 'A. 기초 문법' },
-      { id: 'k-8', title: '비문학 구조 독해 심화', status: 'active', grade: '중3', total: 50, note: '수능 공통 영역 선점', period: '2학기 중간 대비', bundle: 'B. 문해력과 독해' },
+      { id: 'k1-1', title: '단어의 갈래 (품사)', status: 'active', grade: '중1', total: 20, note: '문법 기초 다지기', period: '1학기 기말 선행', bundle: 'A. 기초 문법' },
+      { id: 'k1-2', title: '언어의 본질과 어휘', status: 'active', grade: '중1', total: 30, note: '문해력 기본기', period: '1학기 기말 선행', bundle: 'B. 문해력과 독해' },
+      { id: 'k2-1', title: '문장의 짜임과 성분', status: 'active', grade: '중2', total: 30, note: '고1 국어 내신 직결', period: '1학기 기말 선행', bundle: 'A. 기초 문법' },
+      { id: 'k2-2', title: '설명문과 논설문 읽기', status: 'active', grade: '중2', total: 45, note: '모든 공부의 기초 독해력', period: '상시 (고입 준비)', bundle: 'B. 문해력과 독해' },
+      { id: 'k2-3', title: '한글 창제 원리와 가치', status: 'locked', grade: '중2', total: 15, note: '고등 중세문법 대비', period: '상시 (고입 준비)', bundle: 'A. 기초 문법' },
+      { id: 'k3-1', title: '음운의 체계와 변동', status: 'active', grade: '중3', total: 30, note: '1학기 필수 문법!', period: '1학기 기말 대비', bundle: 'A. 기초 문법' },
+      { id: 'k3-2', title: '비문학 구조 독해 심화', status: 'active', grade: '중3', total: 50, note: '수능 공통 영역 선점', period: '2학기 중간 대비', bundle: 'B. 문해력과 독해' },
     ],
   };
 

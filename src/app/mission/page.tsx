@@ -1,15 +1,39 @@
 /**
- * 작성일: 2026-04-28
+ * 작성일: 2026-04-30
  * 작성자: 시스템 (Project Sua)
- * 클래스 설명: 리뷰 모드 시 오답/정답 동시 노출 UI 및 주관식 읽기 전용 복구 로직이 적용된 최종 엔진
+ * 클래스 설명: 리뷰 모드 시 오답/정답 동시 노출 UI 및 주관식 복구 로직이 적용된 최종 엔진 (전체 단원 연동 확장)
  */
 
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { renderFormattedText } from '@/utils/textFormatter';
+
+// ✅ 모든 단원 데이터 가져오기
+// [수학]
 import { math_m1_1_questions } from '@/data/questions/math/m1-1';
+import { math_m1_2_questions } from '@/data/questions/math/m1-2';
+import { math_m2_1_questions } from '@/data/questions/math/m2-1';
+import { math_m2_2_questions } from '@/data/questions/math/m2-2';
+import { math_m3_1_questions } from '@/data/questions/math/m3-1';
+import { math_m3_2_questions } from '@/data/questions/math/m3-2';
+
+// [영어]
+import { eng_e1_1_questions } from '@/data/questions/eng/e1-1';
+import { eng_e1_2_questions } from '@/data/questions/eng/e1-2';
+import { eng_e1_3_questions } from '@/data/questions/eng/e1-3';
+import { eng_e2_1_questions } from '@/data/questions/eng/e2-1';
+import { eng_e2_2_questions } from '@/data/questions/eng/e2-2';
+import { eng_e2_3_questions } from '@/data/questions/eng/e2-3';
+import { eng_e3_1_questions } from '@/data/questions/eng/e3-1';
+
+// [국어]
+import { kor_k1_1_questions } from '@/data/questions/kor/k1-1';
+import { kor_k2_1_questions } from '@/data/questions/kor/k2-1';
+import { kor_k3_1_questions } from '@/data/questions/kor/k3-1';
+
 import { Question } from '@/types/question';
 import { useProgressStore } from '@/store/useProgressStore';
 
@@ -37,7 +61,32 @@ function MissionContent() {
   const [activeRationaleIdx, setActiveRationaleIdx] = useState<number | null>(null);
   const [elapsedSec, setElapsedSec] = useState(0);
 
-  const questions = unitId === 'm1-1' ? math_m1_1_questions : [];
+  // ✅ unitId에 따라 동적으로 질문 배열 매핑 (영어, 국어 추가)
+  const questions = useMemo(() => {
+    switch (unitId) {
+      // 수학
+      case 'm1-1': return math_m1_1_questions;
+      case 'm1-2': return math_m1_2_questions;
+      case 'm2-1': return math_m2_1_questions;
+      case 'm2-2': return math_m2_2_questions;
+      case 'm3-1': return math_m3_1_questions;
+      case 'm3-2': return math_m3_2_questions;
+      // 영어
+      case 'e1-1': return eng_e1_1_questions;
+      case 'e1-2': return eng_e1_2_questions;
+      case 'e1-3': return eng_e1_3_questions;
+      case 'e2-1': return eng_e2_1_questions;
+      case 'e2-2': return eng_e2_2_questions;
+      case 'e2-3': return eng_e2_3_questions;
+      case 'e3-1': return eng_e3_1_questions;
+      // 국어
+      case 'k1-1': return kor_k1_1_questions;
+      case 'k2-1': return kor_k2_1_questions;
+      case 'k3-1': return kor_k3_1_questions;
+      default: return [];
+    }
+  }, [unitId]);
+
   const totalQuestions = questions.length;
   const currentQ: Question = questions[currentIdx];
 
@@ -100,6 +149,7 @@ function MissionContent() {
       <div className="p-5 h-screen flex flex-col items-center justify-center text-center space-y-4">
         <div className="text-5xl">🚧</div>
         <h2 className="text-xl font-black text-gray-900">문제를 준비 중이에요!</h2>
+        <p className="text-sm text-gray-500">ID: {unitId || '알 수 없음'}</p>
         <Link href="/library" className="bg-gray-900 text-white px-6 py-3 rounded-xl font-bold text-sm">서재로 돌아가기</Link>
       </div>
     );
@@ -155,7 +205,6 @@ function MissionContent() {
     setPhase('RESULT');
   };
 
-  // ✅ 변경점: 주관식은 클릭 확인 절차 없이 바로 복구되도록 분기 처리
   const handleResolve = () => {
     if (!unitId) return;
 
@@ -240,7 +289,7 @@ function MissionContent() {
             {isReview ? 'REVIEW MODE' : `REAL TEST (${answeredCount}/${totalQuestions} 풀이 완료)`}
           </span>
           <h1 className="text-[17px] font-black text-gray-900 leading-relaxed break-keep">
-            {currentIdx + 1}. <Latex>{currentQ.question}</Latex>
+            {currentIdx + 1}. {renderFormattedText(currentQ.question)}
           </h1>
         </div>
         <div className="text-xs font-black text-gray-400 shrink-0 pt-1 whitespace-nowrap">
@@ -252,7 +301,7 @@ function MissionContent() {
         <div className="bg-gray-50 p-5 rounded-2xl border border-gray-200 space-y-4 shadow-inner">
           {currentQ.passage && (
             <div className="text-sm text-gray-700 leading-loose break-keep font-medium">
-              <Latex>{currentQ.passage}</Latex>
+              {renderFormattedText(currentQ.passage)}
             </div>
           )}
           {currentQ.imageUrl && (
@@ -297,12 +346,12 @@ function MissionContent() {
                     style={(isSelected || (isReview && isCorrectAnswer)) ? { backgroundColor: isReview ? (isCorrectAnswer ? '#10b981' : (isSelected ? '#ef4444' : '')) : '#2563eb' } : {}}>
                     {optionNum}
                   </span>
-                  <div className="flex-1 text-sm font-medium"><Latex>{opt.text}</Latex></div>
+                  <div className="flex-1 text-sm font-medium">{renderFormattedText(opt.text)}</div>
                 </button>
                 {/* 선택한 보기에 대한 해설 노출 (복구 버튼 포함) */}
                 {isReview && activeRationaleIdx === idx && (
                   <div className="mx-2 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-300 text-xs text-gray-600 leading-relaxed animate-in fade-in slide-in-from-top-2">
-                    <span className="font-bold text-gray-900 mr-1">해설:</span> <Latex>{opt.rationale}</Latex>
+                    <span className="font-bold text-gray-900 mr-1">해설:</span> {renderFormattedText(opt.rationale)}
                     {isCorrectAnswer && !isCorrectInReview && (
                       <button onClick={handleResolve} className="mt-3 w-full bg-green-600 text-white font-black py-2 rounded-lg transition-transform active:scale-[0.98]">이 정답으로 오답 복구하기</button>
                     )}
@@ -332,7 +381,7 @@ function MissionContent() {
 
                 <div className="p-5 bg-gray-50 rounded-xl border border-gray-200 mt-2 animate-in fade-in">
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    <span className="font-bold text-gray-900 mr-2">해설:</span> <Latex>{currentQ.explanation}</Latex>
+                    <span className="font-bold text-gray-900 mr-2">해설:</span> {renderFormattedText(currentQ.explanation)}
                   </p>
                   {!isCorrectInReview && (
                     <button onClick={handleResolve} className="mt-4 w-full bg-green-600 text-white font-black py-3 rounded-xl shadow-md transition-transform active:scale-[0.98]">
