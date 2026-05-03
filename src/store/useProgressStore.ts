@@ -5,6 +5,7 @@
  * 업데이트 내용: 
  * 1. similarQuestionRequests 데이터의 Firestore 서버 동기화 로직(saveUserData) 추가
  * 2. syncFromFirebase 실행 시 서버의 유사 문제 요청 내역을 로컬로 불러오도록 수정
+ * 3. [신규] setUser 실행 시 로그인된 사용자의 이메일과 닉네임을 Firestore에 병합 저장
  */
 
 import { create } from 'zustand';
@@ -63,7 +64,16 @@ export const useProgressStore = create<ProgressState>()(
       userSelections: {},
       similarQuestionRequests: {},
 
-      setUser: (user) => set({ user }),
+      // ✅ [업데이트됨] 유저 정보가 세팅될 때 Firestore에 이메일 정보 병합 저장
+      setUser: (user) => {
+        set({ user });
+        if (user && user.uid) {
+          saveUserData(user.uid, {
+            email: user.email,
+            displayName: user.displayName
+          }).catch(err => console.error("[Store] 유저 정보 저장 실패:", err));
+        }
+      },
 
       setCareerPath: (path) => set({ careerPath: path }),
 

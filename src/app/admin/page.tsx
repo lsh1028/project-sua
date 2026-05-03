@@ -1,7 +1,7 @@
 /**
  * 작성일: 2026-05-03
  * 작성자: 시스템 (Project Sua)
- * 클래스 설명: 관리자 전용 오답 상담 모니터링 대시보드 및 AI 프롬프트 생성기
+ * 클래스 설명: 관리자 전용 오답 상담 모니터링 대시보드 (보안, 일괄 프롬프트 추출, 간소화 UI 적용)
  */
 
 'use client';
@@ -9,7 +9,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { getAllUsersStats } from '@/lib/firebase/service';
 import { Question } from '@/types/question';
-import { renderFormattedText } from '@/utils/textFormatter';
 
 // [데이터 임포트] - ClinicPage와 동일하게 모든 문항 데이터를 가져온다.
 import { math_m1_1_questions } from '@/data/questions/math/m1-1';
@@ -29,14 +28,20 @@ import { kor_k1_1_questions } from '@/data/questions/kor/k1-1';
 import { kor_k2_1_questions } from '@/data/questions/kor/k2-1';
 import { kor_k3_1_questions } from '@/data/questions/kor/k3-1';
 
+// ✅ 관리자 진입용 암호 (필요시 변경 가능)
+const ADMIN_PASSWORD = '0804';
+
 interface RequestItem {
   uid: string;
+  email: string;
   unitId: string;
   questionId: string;
   questionData?: Question;
 }
 
 export default function AdminDashboard() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -50,6 +55,9 @@ export default function AdminDashboard() {
   ], []);
 
   useEffect(() => {
+    // 인증되지 않았다면 데이터를 불러오지 않음
+    if (!isAuthenticated) return;
+
     const fetchRequests = async () => {
       try {
         const users = await getAllUsersStats();
@@ -57,6 +65,8 @@ export default function AdminDashboard() {
 
         users.forEach((user) => {
           const simReqs = user.data.similarQuestionRequests || {};
+          // ✅ 이메일 정보가 있으면 최우선으로 사용, 없으면 UID 표기
+          const userIdentifier = user.data.email || user.uid; 
           
           Object.keys(simReqs).forEach((unitId) => {
             const questionIds: string[] = simReqs[unitId];
@@ -65,6 +75,7 @@ export default function AdminDashboard() {
               const qData = allQuestions.find((q) => q.id === qId);
               extractedRequests.push({
                 uid: user.uid,
+                email: userIdentifier,
                 unitId,
                 questionId: qId,
                 questionData: qData,
@@ -82,76 +93,121 @@ export default function AdminDashboard() {
     };
 
     fetchRequests();
-  }, [allQuestions]);
+  }, [isAuthenticated, allQuestions]);
 
-  // ✅ AI(코딩 파트너)에게 전달할 프롬프트 복사 기능
-  const handleCopyPrompt = (item: RequestItem) => {
-    if (!item.questionData) {
-      alert("원본 문제 데이터를 찾을 수 없습니다.");
+  // ✅ 암호 확인 처리
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+    } else {
+      alert('비밀번호가 일치하지 않습니다.');
+      setPasswordInput('');
+    }
+  };
+
+  // ✅ 모든 문제 일괄 AI 프롬프트 생성 및 복사 기능
+  const handleBulkCopyPrompt = () => {
+    if (requests.length === 0) {
+      alert("요청된 문제가 없습니다.");
       return;
     }
 
-    const promptText = `다음 문제와 완전히 동일한 논리 구조와 난이도를 가진 '유사 문제'를 1개 만들어줘.
-데이터 포맷은 기존 문제 파일 규격(JSON/Object)에 맞춰서 작성해줘.
+    let promptText = `다음 ${requests.length}개의 문제들에 대해 각각 완전히 동일한 논리 구조와 난이도를 가진 '유사 문제'를 1개씩 만들어줘.\n데이터 포맷은 기존 문제 파일 규격(JSON/Object)에 맞춰 배열 형태로 작성해줘.\n\n`;
 
-[원본 문제 정보]
-- 단원 ID: ${item.unitId}
-- 문제 ID: ${item.questionId}
-- 발문: ${item.questionData.question}
-${item.questionData.passage ? `- 지문: ${item.questionData.passage}` : ''}
-`;
+    requests.forEach((req, idx) => {
+      promptText += `[요청 ${idx + 1}]\n`;
+      promptText += `- 단원 ID: ${req.unitId}\n`;
+      promptText += `- 문제 ID: ${req.questionId}\n`;
+      if (req.questionData) {
+        promptText += `- 발문: ${req.questionData.question}\n`;
+        if (req.questionData.passage) promptText += `- 지문: ${req.questionData.passage}\n`;
+      } else {
+        promptText += `- 경고: 로컬 데이터에서 문제 내용을 찾을 수 없음.\n`;
+      }
+      promptText += `\n`;
+    });
 
     navigator.clipboard.writeText(promptText)
-      .then(() => alert("AI 프롬프트가 클립보드에 복사되었습니다. 대화창에 붙여넣기 하세요."))
+      .then(() => alert(`${requests.length}개 문제의 AI 프롬프트가 클립보드에 일괄 복사되었습니다. 대화창에 붙여넣기 하세요.`))
       .catch(() => alert("복사 실패. 브라우저 권한을 확인하세요."));
   };
 
-  if (isLoading) return <div className="p-10 font-bold">데이터 로딩 중...</div>;
+  // 보안(로그인) 화면
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+        <form onSubmit={handleLogin} className="bg-white p-8 rounded-3xl shadow-sm border border-gray-200 text-center space-y-5 w-full max-w-sm">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-black text-gray-900 tracking-tight">ADMIN ACCESS</h1>
+            <p className="text-xs text-gray-400 font-bold">관리자 전용 페이지입니다.</p>
+          </div>
+          <input 
+            type="password" 
+            value={passwordInput}
+            onChange={(e) => setPasswordInput(e.target.value)}
+            placeholder="비밀번호 입력"
+            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-center text-lg font-bold tracking-widest focus:outline-none focus:border-blue-500 transition-colors"
+            autoFocus
+          />
+          <button type="submit" className="w-full py-3 bg-black text-white font-bold rounded-xl hover:bg-gray-800 transition-colors">
+            접속하기
+          </button>
+        </form>
+      </div>
+    );
+  }
 
+  // 대시보드 화면
   return (
     <div className="p-8 bg-gray-50 min-h-screen text-gray-900">
-      <header className="mb-8">
-        <h1 className="text-3xl font-black tracking-tighter">관리자 대시보드</h1>
-        <p className="text-sm text-gray-500 font-bold mt-1">실시간 인입된 유사 문제 요청 현황 및 프롬프트 제네레이터</p>
+      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black tracking-tighter">관리자 대시보드</h1>
+          <p className="text-sm text-gray-500 font-bold mt-1">실시간 인입된 유사 문제 일괄 처리 시스템</p>
+        </div>
+        <button 
+          onClick={handleBulkCopyPrompt}
+          className="px-6 py-3 bg-blue-600 text-white text-sm font-black rounded-xl hover:bg-blue-700 transition-colors shadow-sm whitespace-nowrap"
+        >
+          {requests.length}개 문제 일괄 프롬프트 복사
+        </button>
       </header>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-gray-900 text-white text-xs uppercase tracking-widest">
-              <th className="p-4">유저 UID</th>
-              <th className="p-4">단원 / 문제 ID</th>
-              <th className="p-4">원본 문제 미리보기</th>
-              <th className="p-4 text-center">액션</th>
+              <th className="p-4 w-16 text-center">No</th>
+              <th className="p-4">요청자 식별</th>
+              <th className="p-4">단원 정보</th>
+              <th className="p-4">문제 ID</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {requests.map((req, idx) => (
-              <tr key={idx} className="hover:bg-blue-50/50 transition-colors">
-                <td className="p-4 text-xs font-mono text-gray-400">{req.uid.substring(0, 8)}...</td>
-                <td className="p-4">
-                  <span className="block text-xs font-black text-blue-600">{req.unitId}</span>
-                  <span className="block text-xs text-gray-500">{req.questionId}</span>
-                </td>
-                <td className="p-4 text-sm font-medium text-gray-700 max-w-md truncate">
-                  {req.questionData ? renderFormattedText(req.questionData.question) : "데이터 없음"}
-                </td>
-                <td className="p-4 text-center">
-                  <button 
-                    onClick={() => handleCopyPrompt(req)}
-                    className="px-4 py-2 bg-black text-white text-xs font-bold rounded-lg hover:bg-gray-800 transition-colors"
-                  >
-                    AI 프롬프트 복사
-                  </button>
-                </td>
+            {isLoading ? (
+              <tr>
+                <td colSpan={4} className="p-10 text-center text-gray-400 font-bold">데이터 로딩 중...</td>
               </tr>
-            ))}
-            {requests.length === 0 && (
+            ) : requests.length === 0 ? (
               <tr>
                 <td colSpan={4} className="p-10 text-center text-gray-400 font-bold">
                   현재 인입된 요청이 없습니다.
                 </td>
               </tr>
+            ) : (
+              requests.map((req, idx) => (
+                <tr key={idx} className="hover:bg-blue-50/50 transition-colors">
+                  <td className="p-4 text-center text-xs font-bold text-gray-400">{idx + 1}</td>
+                  <td className="p-4 font-bold text-sm text-gray-700">{req.email}</td>
+                  <td className="p-4">
+                    <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-black">
+                      {req.unitId}
+                    </span>
+                  </td>
+                  <td className="p-4 font-mono text-sm text-gray-500 font-bold">{req.questionId}</td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>
