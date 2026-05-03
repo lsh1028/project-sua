@@ -29,7 +29,7 @@ import { kor_k2_1_questions } from '@/data/questions/kor/k2-1';
 import { kor_k3_1_questions } from '@/data/questions/kor/k3-1';
 
 // ✅ 관리자 진입용 암호 (필요시 변경 가능)
-const ADMIN_PASSWORD = '0804';
+const ADMIN_PASSWORD = '1028';
 
 interface RequestItem {
   uid: string;
