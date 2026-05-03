@@ -1,12 +1,10 @@
 /**
- * 작성일: 2026-04-28
+ * 작성일: 2026-05-03
  * 작성자: 시스템 (Project Sua)
  * 클래스 설명: Firebase Auth 기반 계정 상태 관리, 연속 출석(Streak) 자동 계산 및 꿈(Career) 데이터가 통합된 전역 스토어
  * 업데이트 내용: 
- * 1. careerPath 상태 필드 추가 및 setCareerPath 액션 구현
- * 2. syncFromFirebase 내 Firestore 데이터(careerPath) 동기화 로직 추가
- * 3. resetAllData 호출 시 꿈 데이터도 함께 파기되도록 수정
- * 4. 입장 암호(isPasswordEnabled) 상태 및 토글 액션 추가
+ * 1. similarQuestionRequests 데이터의 Firestore 서버 동기화 로직(saveUserData) 추가
+ * 2. syncFromFirebase 실행 시 서버의 유사 문제 요청 내역을 로컬로 불러오도록 수정
  */
 
 import { create } from 'zustand';
@@ -24,10 +22,7 @@ interface ProgressState {
   streak: number;
   lastLoginDate: string | null;
   
-  // ✅ 신규: 수아의 꿈(목표) 데이터 상태
   careerPath: string | null;
-
-  // ✅ 신규: 입장 암호(0804) 활성화 여부
   isPasswordEnabled: boolean;
 
   progress: Record<string, number>;
@@ -39,20 +34,19 @@ interface ProgressState {
   syncFromFirebase: (uid: string) => Promise<void>;
   checkAndCalculateStreak: (uid: string) => Promise<void>;
   
-  // ✅ 신규: 꿈 설정 액션 (UI 실시간 업데이트용)
   setCareerPath: (path: string) => void;
-
-  // ✅ 신규: 입장 암호 설정 액션
   setPasswordEnabled: (enabled: boolean) => void;
 
   updateProgress: (unitId: string, currentSolvedIndex: number) => Promise<void>;
   saveUserSelection: (unitId: string, questionIdx: number, selection: any) => void;
   recordWrongAnswers: (unitId: string, wrongIds: string[]) => Promise<void>;
   resolveWrongAnswer: (unitId: string, questionId: string) => Promise<void>;
-  requestSimilarQuestion: (unitId: string, questionId: string) => void;
-  removeSimilarQuestionRequest: (unitId: string, questionId: string) => void;
-  clearUnitData: (unitId: string) => void;
   
+  // ✅ 서버 비동기 통신을 위해 Promise 반환 타입으로 변경
+  requestSimilarQuestion: (unitId: string, questionId: string) => Promise<void>;
+  removeSimilarQuestionRequest: (unitId: string, questionId: string) => Promise<void>;
+  
+  clearUnitData: (unitId: string) => void;
   resetAllData: () => void;
 }
 
@@ -62,8 +56,8 @@ export const useProgressStore = create<ProgressState>()(
       user: null,
       streak: 0,
       lastLoginDate: null,
-      careerPath: null, // 초기값 설정
-      isPasswordEnabled: true, // ✅ 신규: 초기 상태는 암호 사용으로 설정
+      careerPath: null, 
+      isPasswordEnabled: true, 
       progress: {},
       wrongAnswers: {},
       userSelections: {},
@@ -71,10 +65,8 @@ export const useProgressStore = create<ProgressState>()(
 
       setUser: (user) => set({ user }),
 
-      // ✅ 신규: 로컬 상태의 꿈 데이터를 즉시 변경
       setCareerPath: (path) => set({ careerPath: path }),
 
-      // ✅ 신규: 입장 암호 사용 여부 변경 액션
       setPasswordEnabled: (enabled) => set({ isPasswordEnabled: enabled }),
 
       syncFromFirebase: async (uid) => {
@@ -84,13 +76,13 @@ export const useProgressStore = create<ProgressState>()(
             set({ 
               progress: remoteData.unitProgress || {},
               wrongAnswers: remoteData.wrongAnswers || {},
+              // ✅ 서버 Firestore에 저장된 유사 문제 요청 내역 동기화
+              similarQuestionRequests: remoteData.similarQuestionRequests || {},
               streak: remoteData.streak || 0,
               lastLoginDate: remoteData.lastLoginDate || null,
-              // ✅ 서버 Firestore에 저장된 꿈 데이터 동기화
               careerPath: remoteData.careerPath || null
             });
           } else {
-            // 서버에 데이터가 없는 신규 계정 접속 시, 기기에 남은 타인의 로컬 데이터를 파기
             get().resetAllData();
           }
           await get().checkAndCalculateStreak(uid);
@@ -163,16 +155,27 @@ export const useProgressStore = create<ProgressState>()(
         if (user) await saveUserData(user.uid, { unitProgress: progress, wrongAnswers });
       },
 
-      requestSimilarQuestion: (unitId, questionId) => {
+      // ✅ 로컬 상태 업데이트 후 Firebase DB와 동기화 수행
+      requestSimilarQuestion: async (unitId, questionId) => {
         set((state) => ({
           similarQuestionRequests: {
             ...state.similarQuestionRequests,
             [unitId]: Array.from(new Set([...(state.similarQuestionRequests[unitId] || []), questionId]))
           }
         }));
+
+        const { user, progress, wrongAnswers, similarQuestionRequests } = get();
+        if (user) {
+          await saveUserData(user.uid, { 
+            unitProgress: progress, 
+            wrongAnswers, 
+            similarQuestionRequests 
+          });
+        }
       },
 
-      removeSimilarQuestionRequest: (unitId, questionId) => {
+      // ✅ 로컬 상태 삭제 후 Firebase DB와 동기화 수행
+      removeSimilarQuestionRequest: async (unitId, questionId) => {
         set((state) => {
           const currentRequests = state.similarQuestionRequests[unitId] || [];
           return {
@@ -182,6 +185,15 @@ export const useProgressStore = create<ProgressState>()(
             }
           };
         });
+
+        const { user, progress, wrongAnswers, similarQuestionRequests } = get();
+        if (user) {
+          await saveUserData(user.uid, { 
+            unitProgress: progress, 
+            wrongAnswers, 
+            similarQuestionRequests 
+          });
+        }
       },
 
       clearUnitData: (unitId) => {
@@ -200,7 +212,6 @@ export const useProgressStore = create<ProgressState>()(
         });
       },
 
-      // 모든 로컬 데이터 강제 초기화 (로그아웃 및 신규 계정용)
       resetAllData: () => {
         set({
           progress: {},
@@ -209,8 +220,8 @@ export const useProgressStore = create<ProgressState>()(
           similarQuestionRequests: {},
           streak: 0,
           lastLoginDate: null,
-          careerPath: null, // ✅ 꿈 데이터도 함께 초기화
-          isPasswordEnabled: true // ✅ 계정 리셋 시 암호 상태도 기본값으로 복구
+          careerPath: null, 
+          isPasswordEnabled: true 
         });
       }
     }),

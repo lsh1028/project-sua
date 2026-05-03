@@ -1,15 +1,13 @@
 /**
- * 작성일: 2026-04-28
+ * 작성일: 2026-05-03
  * 작성자: 시스템 (Project Sua)
  * 클래스 설명: Firebase Authentication(구글 로그인) 및 uid 기반 Firestore 데이터 통신 서비스
  * 업데이트 내용: 
- * 1. 구글 로그인 및 로그아웃 기능 추가
- * 2. 하드코딩된 USER_ID 제거 및 uid 기반 데이터 입출력으로 개편
- * 3. 통합 상태 저장을 위한 saveUserData 추가 및 불필요한 레벨(level) 로직 제거
+ * 1. 관리자 대시보드 연동을 위한 전체 유저 데이터 조회 함수(getAllUsersStats) 및 필수 모듈(collection, getDocs) 추가
  */
 
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc, serverTimestamp, collection, getDocs } from "firebase/firestore";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import { UserStats, StudyLog } from '@/types/question'; // 기존 타입 임포트 유지
 
@@ -82,4 +80,17 @@ export const updateCareerPath = async (uid: string, path: string) => {
     careerPath: path,
     // level: 15 <- 의미 없는 레벨 하드코딩 제거됨
   }, { merge: true });
+};
+
+// 5. [관리자 전용] 모든 유저의 데이터 가져오기
+export const getAllUsersStats = async () => {
+  const usersRef = collection(db, "users");
+  const snapshot = await getDocs(usersRef);
+  const usersData: Array<{ uid: string; data: any }> = [];
+  
+  snapshot.forEach((doc) => {
+    usersData.push({ uid: doc.id, data: doc.data() });
+  });
+  
+  return usersData;
 };

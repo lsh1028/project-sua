@@ -1,12 +1,15 @@
 /**
- * 작성일: 2026-04-30
+ * 작성일: 2026-05-03
  * 작성자: 시스템 (Project Sua)
  * 클래스 설명: 유사 문제 요청 리스트 관리 (삭제 기능 연동) 및 전체 단원 문항 연동
+ * 업데이트 내용:
+ * 1. useMemo를 활용하여 465개 대규모 문항 배열 재할당 방지 및 렌더링 성능 최적화
+ * 2. 삭제 버튼 클릭 시 비동기(Promise) 통신을 위한 async/await 및 확인창(confirm) 로직 적용
  */
 
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useProgressStore } from '@/store/useProgressStore';
 import { Question } from '@/types/question';
 import 'katex/dist/katex.min.css';
@@ -39,10 +42,8 @@ import { kor_k3_1_questions } from '@/data/questions/kor/k3-1';
 export default function ClinicPage() {
   const { similarQuestionRequests, removeSimilarQuestionRequest } = useProgressStore();
 
-  const allRequestedIds = Object.values(similarQuestionRequests).flat();
-  
-  // ✅ 모든 과목, 모든 문항 데이터를 하나의 배열로 통합합니다.
-  const allQuestions: Question[] = [
+  // ✅ 1. useMemo 적용: 렌더링 시마다 465개 데이터가 재조합되는 현상 방지
+  const allQuestions: Question[] = useMemo(() => [
     // 수학
     ...math_m1_1_questions,
     ...math_m1_2_questions,
@@ -62,9 +63,19 @@ export default function ClinicPage() {
     ...kor_k1_1_questions,
     ...kor_k2_1_questions,
     ...kor_k3_1_questions
-  ]; 
+  ], []); 
+
+  // ✅ 2. 요청된 ID 배열 캐싱
+  const allRequestedIds = useMemo(() => 
+    Object.values(similarQuestionRequests).flat(),
+    [similarQuestionRequests]
+  );
   
-  const requestedQuestions = allQuestions.filter(p => allRequestedIds.includes(p.id));
+  // ✅ 3. 최종 출력될 문제 리스트 필터링 최적화
+  const requestedQuestions = useMemo(() => 
+    allQuestions.filter(p => allRequestedIds.includes(p.id)),
+    [allQuestions, allRequestedIds]
+  );
 
   return (
     <div className="p-5 pb-24 space-y-6 text-gray-900">
@@ -96,9 +107,13 @@ export default function ClinicPage() {
                     </span>
                     <p className="text-[10px] text-gray-400 font-bold">{question.unitId} | ID: {question.id}</p>
                   </div>
-                  {/* ✅ 클릭 시 삭제 이벤트 연결 */}
+                  {/* ✅ 클릭 시 비동기 서버 통신 및 사용자 확인 로직 추가 */}
                   <button 
-                    onClick={() => removeSimilarQuestionRequest(question.unitId, question.id)}
+                    onClick={async () => {
+                      if (confirm("이 요청 내역을 삭제하겠습니까?")) {
+                        await removeSimilarQuestionRequest(question.unitId, question.id);
+                      }
+                    }}
                     className="text-[10px] font-black text-gray-300 hover:text-red-500 transition-colors"
                   >
                     삭제

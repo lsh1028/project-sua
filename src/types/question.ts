@@ -1,8 +1,10 @@
 /**
- * 작성일: 2026-04-28
+ * 작성일: 2026-05-03
  * 작성자: 시스템 (Project Sua)
  * 클래스 설명: 1,200제 문제 데이터베이스 표준 규격 및 학습 로그 스키마
- * 업데이트: 국어/영어 지문(passage), 수학 도형/그래프(imageUrl) 지원 추가
+ * 업데이트: 
+ * 1. 국어/영어 지문(passage), 수학 도형/그래프(imageUrl) 지원 추가
+ * 2. UserStats 내 유사 문제 요청 내역(similarQuestionRequests) 동기화용 필드 추가
  */
 
 export type QuestionType = 'choice' | 'short';
@@ -20,7 +22,7 @@ export interface Question {
   type: QuestionType;     // 문제 유형
   
   // [추가됨] 국어/영어의 긴 지문이나 수학의 조건 박스
-  passage?: string;       
+  passage?: string;        
   
   // [추가됨] 수학 도형, 그래프 등 첨부 이미지 URL
   imageUrl?: string;      
@@ -44,6 +46,10 @@ export interface StudyLog {
 export interface UserStats {
   unitProgress: Record<string, number>; // 각 단원별 진행도 (문제 번호)
   wrongAnswers: Record<string, string[]>; // 단원별 오답 ID 리스트
+  
+  // ✅ [추가됨] 서버 동기화용 유사 문제 요청 내역 (단원ID: 문제ID 배열)
+  similarQuestionRequests?: Record<string, string[]>; 
+  
   streak: number;                       // 연속 학습 일수
   lastLoginDate: string | null;         // 마지막 로그인 날짜
   careerPath: string | null;            // 설정된 꿈/목표
