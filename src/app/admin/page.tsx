@@ -1,7 +1,7 @@
 /**
  * 작성일: 2026-05-03
  * 작성자: 시스템 (Project Sua)
- * 클래스 설명: 관리자 전용 오답 상담 모니터링 대시보드 (보안, 일괄 프롬프트 추출, 간소화 UI 적용)
+ * 클래스 설명: 관리자 전용 오답 상담 모니터링 대시보드 (보안, 일괄 프롬프트 추출, 간소화 UI 적용 및 모바일 반응형 가로스크롤 최적화)
  */
 
 'use client';
@@ -160,11 +160,12 @@ export default function AdminDashboard() {
 
   // 대시보드 화면
   return (
-    <div className="p-8 bg-gray-50 min-h-screen text-gray-900">
-      <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="p-4 md:p-8 bg-gray-50 min-h-screen text-gray-900">
+      <header className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tighter">관리자 대시보드</h1>
-          <p className="text-sm text-gray-500 font-bold mt-1">실시간 인입된 유사 문제 일괄 처리 시스템</p>
+          {/* ✅ break-keep 추가: 글자 "드"가 밀려 내려가는 현상 방지 */}
+          <h1 className="text-2xl md:text-3xl font-black tracking-tighter break-keep">관리자 대시보드</h1>
+          <p className="text-xs md:text-sm text-gray-500 font-bold mt-1">실시간 인입된 유사 문제 일괄 처리 시스템</p>
         </div>
         <button 
           onClick={handleBulkCopyPrompt}
@@ -174,14 +175,17 @@ export default function AdminDashboard() {
         </button>
       </header>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <table className="w-full text-left border-collapse">
+      {/* ✅ overflow-x-auto 추가: 표가 화면 밖으로 넘치면 가로 스크롤 생성 */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-x-auto">
+        {/* ✅ min-w-[600px] 추가: 표 너비가 모바일 화면폭에 억지로 구겨지지 않도록 최소 폭 지정 */}
+        <table className="w-full text-left border-collapse min-w-[600px]">
           <thead>
             <tr className="bg-gray-900 text-white text-xs uppercase tracking-widest">
-              <th className="p-4 w-16 text-center">No</th>
-              <th className="p-4">요청자 식별</th>
-              <th className="p-4">단원 정보</th>
-              <th className="p-4">문제 ID</th>
+              {/* ✅ whitespace-nowrap 추가: 제목 줄바꿈 방지 */}
+              <th className="p-4 w-16 text-center whitespace-nowrap">No</th>
+              <th className="p-4 whitespace-nowrap">요청자 식별</th>
+              <th className="p-4 whitespace-nowrap">단원 정보</th>
+              <th className="p-4 whitespace-nowrap">문제 ID</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -199,13 +203,18 @@ export default function AdminDashboard() {
               requests.map((req, idx) => (
                 <tr key={idx} className="hover:bg-blue-50/50 transition-colors">
                   <td className="p-4 text-center text-xs font-bold text-gray-400">{idx + 1}</td>
-                  <td className="p-4 font-bold text-sm text-gray-700">{req.email}</td>
+                  {/* ✅ max-w-[200px] truncate 추가: 이메일이 너무 길면 줄임표(...) 처리 및 title로 전체 보기 지원 */}
+                  <td className="p-4 font-bold text-sm text-gray-700 max-w-[200px] truncate" title={req.email}>
+                    {req.email}
+                  </td>
                   <td className="p-4">
-                    <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-black">
+                    <span className="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-xs font-black whitespace-nowrap">
                       {req.unitId}
                     </span>
                   </td>
-                  <td className="p-4 font-mono text-sm text-gray-500 font-bold">{req.questionId}</td>
+                  <td className="p-4 font-mono text-sm text-gray-500 font-bold whitespace-nowrap">
+                    {req.questionId}
+                  </td>
                 </tr>
               ))
             )}
